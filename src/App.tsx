@@ -44,6 +44,7 @@ export default function App() {
     setChallenges, 
     setBalance, 
     setHasCompletedOnboarding,
+    setIsPremium,
     darkMode
   } = useStore();
 
@@ -74,6 +75,7 @@ export default function App() {
         const data = docSnap.data();
         if (data.balance !== undefined) setBalance(data.balance);
         if (data.hasCompletedOnboarding !== undefined) setHasCompletedOnboarding(data.hasCompletedOnboarding);
+        if (data.isPremium !== undefined) setIsPremium(data.isPremium);
       }
       setAuthReady(true);
     }, (error) => {
@@ -112,7 +114,7 @@ export default function App() {
       unsubscribeGoals();
       unsubscribeChallenges();
     };
-  }, [user, setTransactions, setGoals, setChallenges, setBalance, setHasCompletedOnboarding, setAuthReady]);
+  }, [user, setTransactions, setGoals, setChallenges, setBalance, setHasCompletedOnboarding, setIsPremium, setAuthReady]);
 
   return (
     <BrowserRouter>

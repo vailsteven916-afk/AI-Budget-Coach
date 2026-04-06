@@ -5,10 +5,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useStore } from '../store/useStore';
+import { useTranslation } from '../lib/i18n';
 
 export default function Profile() {
-  const challenges = useStore(state => state.challenges);
-  const user = useStore(state => state.user);
+  const { challenges, user, language, isPremium } = useStore();
+  const { t } = useTranslation(language);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -23,7 +24,7 @@ export default function Profile() {
   return (
     <div className="flex flex-col min-h-full pb-24">
       <header className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
-        <h1 className="text-2xl font-bold">Profile</h1>
+        <h1 className="text-2xl font-bold">{t('profile')}</h1>
       </header>
 
       <div className="px-6 space-y-6">
@@ -37,10 +38,17 @@ export default function Profile() {
             <User size={32} />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold">{user?.displayName || 'User'}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold">{user?.displayName || 'User'}</h2>
+              {isPremium && (
+                <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <Crown size={10} /> PRO
+                </div>
+              )}
+            </div>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">{user?.email}</p>
           </div>
-          <Link to="/premium" className="bg-gradient-to-r from-amber-400 to-amber-600 text-white p-2 rounded-xl shadow-lg shadow-amber-500/20">
+          <Link to="/premium" className={`p-2 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 ${isPremium ? 'bg-zinc-100 dark:bg-zinc-800 text-amber-500 shadow-none' : 'bg-gradient-to-r from-amber-400 to-amber-600 text-white shadow-amber-500/20'}`}>
             <Crown size={20} />
           </Link>
         </motion.div>
@@ -51,11 +59,11 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h3 className="text-lg font-bold mb-4">Active Challenges</h3>
+          <h3 className="text-lg font-bold mb-4">{t('activeChallenges')}</h3>
           <div className="space-y-3">
             {challenges.length === 0 ? (
               <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 text-center">
-                <p className="text-zinc-500 dark:text-zinc-400 text-sm">No active challenges.</p>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('noActiveChallenges')}</p>
               </div>
             ) : (
               challenges.map(c => (
@@ -88,7 +96,7 @@ export default function Profile() {
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
                 <Target size={18} />
               </div>
-              <span className="font-medium">Savings Goals</span>
+              <span className="font-medium">{t('savingsGoals')}</span>
             </div>
             <ChevronRight size={20} className="text-zinc-400" />
           </Link>
@@ -98,7 +106,7 @@ export default function Profile() {
               <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center">
                 <Award size={18} />
               </div>
-              <span className="font-medium">Badges & Rewards</span>
+              <span className="font-medium">{t('badgesRewards')}</span>
             </div>
             <ChevronRight size={20} className="text-zinc-400" />
           </Link>
@@ -108,7 +116,7 @@ export default function Profile() {
               <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-lg flex items-center justify-center">
                 <Settings size={18} />
               </div>
-              <span className="font-medium">Settings</span>
+              <span className="font-medium">{t('settings')}</span>
             </div>
             <ChevronRight size={20} className="text-zinc-400" />
           </Link>
@@ -118,7 +126,7 @@ export default function Profile() {
               <div className="w-8 h-8 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-lg flex items-center justify-center">
                 <LogOut size={18} />
               </div>
-              <span className="font-medium text-rose-600 dark:text-rose-400">Log Out</span>
+              <span className="font-medium text-rose-600 dark:text-rose-400">{t('logOut')}</span>
             </div>
           </button>
         </motion.div>

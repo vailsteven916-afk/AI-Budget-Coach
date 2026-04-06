@@ -1,9 +1,59 @@
-import { motion } from 'motion/react';
-import { Crown, CheckCircle2, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Crown, CheckCircle2, ChevronLeft, Loader2, Lock, X, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from '../store/useStore';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { getPurchases } from '../lib/revenuecat';
 
 export default function Premium() {
   const navigate = useNavigate();
+  const { isPremium, user } = useStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleSubscribe = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    setErrorMsg(null);
+    
+    try {
+      const purchases = getPurchases(user.uid);
+      if (!purchases) {
+        throw new Error("RevenueCat is not configured. Please add VITE_REVENUECAT_PUBLIC_KEY to your environment variables.");
+      }
+
+      // Fetch available offerings from RevenueCat
+      const offerings = await purchases.getOfferings();
+      if (!offerings.current || offerings.current.availablePackages.length === 0) {
+        throw new Error("No subscription packages found in RevenueCat. Please configure offerings in your RevenueCat dashboard.");
+      }
+
+      // We'll purchase the first available package in the current offering
+      const packageToBuy = offerings.current.availablePackages[0];
+      
+      // This will redirect to Stripe Checkout or show RevenueCat's web billing UI
+      const { customerInfo } = await purchases.purchasePackage(packageToBuy);
+
+      // Check if the user has any active entitlements after purchase
+      const hasPremium = Object.keys(customerInfo.entitlements.active).length > 0;
+
+      if (hasPremium) {
+        // Update Firebase to reflect premium status
+        await setDoc(doc(db, 'users', user.uid), {
+          isPremium: true
+        }, { merge: true });
+      } else {
+        throw new Error("Purchase completed, but premium entitlement was not unlocked.");
+      }
+    } catch (error: any) {
+      console.error('Error upgrading to premium:', error);
+      setErrorMsg(error.message || "Failed to initiate purchase. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const features = [
     "Unlimited savings goals",
@@ -35,8 +85,12 @@ export default function Premium() {
           <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/20 rotate-12">
             <Crown size={40} className="text-white -rotate-12" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Upgrade to Premium</h1>
-          <p className="text-zinc-400">Unlock the full power of your AI Budget Coach.</p>
+          <h1 className="text-3xl font-bold mb-2">
+            {isPremium ? 'Premium Active' : 'Upgrade to Premium'}
+          </h1>
+          <p className="text-zinc-400">
+            {isPremium ? 'You have unlocked the full power of your AI Budget Coach.' : 'Unlock the full power of your AI Budget Coach.'}
+          </p>
         </motion.div>
 
         <motion.div 
@@ -61,12 +115,43 @@ export default function Premium() {
           transition={{ delay: 0.2 }}
           className="space-y-4"
         >
-          <button className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-amber-500/20">
-            Start 7-Day Free Trial
-          </button>
-          <p className="text-center text-xs text-zinc-500">
-            Then ৳499/month. Cancel anytime.
-          </p>
+          {isPremium ? (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center">
+              <CheckCircle2 size={32} className="text-emerald-500 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-emerald-400 mb-1">You are a Premium Member</h3>
+              <p className="text-sm text-zinc-400">Your subscription is active. Enjoy all the features!</p>
+            </div>
+          ) : (
+            <>
+              {errorMsg && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-sm text-red-400 flex items-start gap-3 mb-4">
+                  <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                  <p>{errorMsg}</p>
+                </div>
+              )}
+              
+              <button 
+                onClick={handleSubscribe}
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:pointer-events-none"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    Connecting to Secure Checkout...
+                  </>
+                ) : (
+                  <>
+                    <Lock size={18} />
+                    Start 7-Day Free Trial
+                  </>
+                )}
+              </button>
+              <p className="text-center text-xs text-zinc-500">
+                Then ৳499/month. Cancel anytime. Billed securely via RevenueCat.
+              </p>
+            </>
+          )}
         </motion.div>
       </div>
     </div>

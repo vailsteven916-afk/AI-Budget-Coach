@@ -11,11 +11,12 @@ import autoTable from 'jspdf-autotable';
 
 export default function PrivacySecurity() {
   const navigate = useNavigate();
-  const { user, transactions, goals, challenges, balance } = useStore();
+  const { user, transactions, goals, challenges, balance, isPremium } = useStore();
   
   const [resetStatus, setResetStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [showResetPopup, setShowResetPopup] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showPremiumAlert, setShowPremiumAlert] = useState(false);
 
   const handlePasswordReset = async () => {
     if (!user?.email) return;
@@ -36,6 +37,11 @@ export default function PrivacySecurity() {
   };
 
   const handleExportData = () => {
+    if (!isPremium) {
+      setShowPremiumAlert(true);
+      return;
+    }
+
     const doc = new jsPDF();
     
     // Header
@@ -204,6 +210,49 @@ export default function PrivacySecurity() {
             <button onClick={() => setShowResetPopup(false)} className="shrink-0 p-1 hover:bg-emerald-600 rounded-full transition-colors">
               <X size={16} />
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPremiumAlert && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-6 shadow-xl text-center"
+            >
+              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield size={32} />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Premium Feature</h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
+                Exporting data to PDF is a premium feature. Upgrade to Premium to unlock this and many other features!
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowPremiumAlert(false)}
+                  className="flex-1 py-3 rounded-xl font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowPremiumAlert(false);
+                    navigate('/premium');
+                  }}
+                  className="flex-1 py-3 rounded-xl font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 transition-transform active:scale-95"
+                >
+                  Upgrade
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

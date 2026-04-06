@@ -1,10 +1,28 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { HelpCircle, Mail, MessageCircle, FileText, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { HelpCircle, Mail, MessageCircle, FileText, ChevronRight, X, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function HelpSupport() {
   const navigate = useNavigate();
+  const [showChat, setShowChat] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [messages, setMessages] = useState<{text: string, isUser: boolean}[]>([
+    { text: "Hi there! How can we help you today?", isUser: false }
+  ]);
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatMessage.trim()) return;
+
+    setMessages(prev => [...prev, { text: chatMessage, isUser: true }]);
+    setChatMessage('');
+
+    // Simulate agent reply
+    setTimeout(() => {
+      setMessages(prev => [...prev, { text: "Thanks for reaching out! An agent will be with you shortly.", isUser: false }]);
+    }, 1000);
+  };
 
   const faqs = [
     { q: "How do I add a transaction?", a: "Tap the '+' button on the bottom navigation bar to add a new income or expense." },
@@ -31,13 +49,19 @@ export default function HelpSupport() {
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-2 gap-4"
         >
-          <button className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 text-center transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+          <button 
+            onClick={() => setShowChat(true)}
+            className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 text-center transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+          >
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center">
               <MessageCircle size={24} />
             </div>
             <span className="font-medium text-sm">Live Chat</span>
           </button>
-          <button className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 text-center transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+          <button 
+            onClick={() => window.location.href = 'mailto:support@aibudgetcoach.com?subject=Support Request'}
+            className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 text-center transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+          >
             <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center">
               <Mail size={24} />
             </div>
@@ -64,6 +88,76 @@ export default function HelpSupport() {
           </div>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showChat && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl shadow-xl overflow-hidden flex flex-col h-[80vh] sm:h-[600px]"
+            >
+              <div className="flex justify-between items-center p-4 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center">
+                    <MessageCircle size={20} />
+                  </div>
+                  <div>
+                    <h2 className="font-bold">Live Support</h2>
+                    <p className="text-xs text-emerald-500">Online</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowChat(false)}
+                  className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-950/50">
+                {messages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] p-3 rounded-2xl ${
+                      msg.isUser 
+                        ? 'bg-emerald-500 text-white rounded-tr-sm' 
+                        : 'bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-tl-sm'
+                    }`}>
+                      <p className="text-sm">{msg.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800">
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={!chatMessage.trim()}
+                    className="w-12 h-12 bg-emerald-500 text-white rounded-xl flex items-center justify-center disabled:opacity-50 transition-colors"
+                  >
+                    <Send size={20} />
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

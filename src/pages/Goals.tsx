@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { formatCurrency } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { Target, Plus, ShieldAlert, Laptop, Plane, Car, Heart, X } from 'lucide-react';
+import { Target, Plus, ShieldAlert, Laptop, Plane, Car, Heart, X, Crown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const iconMap: Record<string, React.ReactNode> = {
   ShieldAlert: <ShieldAlert size={24} />,
@@ -13,8 +14,10 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default function Goals() {
-  const { goals, addGoal } = useStore();
+  const navigate = useNavigate();
+  const { goals, addGoal, isPremium } = useStore();
   const [isAdding, setIsAdding] = useState(false);
+  const [showPremiumAlert, setShowPremiumAlert] = useState(false);
   const [title, setTitle] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -44,7 +47,13 @@ export default function Goals() {
       <header className="px-6 pt-12 pb-6 flex justify-between items-center sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
         <h1 className="text-2xl font-bold">Savings Goals</h1>
         <button 
-          onClick={() => setIsAdding(true)}
+          onClick={() => {
+            if (!isPremium && goals.length >= 3) {
+              setShowPremiumAlert(true);
+            } else {
+              setIsAdding(true);
+            }
+          }}
           className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center"
         >
           <Plus size={20} />
@@ -60,7 +69,13 @@ export default function Goals() {
             <h3 className="text-lg font-bold mb-2">No Goals Yet</h3>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">Set a savings goal to start tracking your progress.</p>
             <button 
-              onClick={() => setIsAdding(true)}
+              onClick={() => {
+                if (!isPremium && goals.length >= 3) {
+                  setShowPremiumAlert(true);
+                } else {
+                  setIsAdding(true);
+                }
+              }}
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors active:scale-[0.98]"
             >
               Create Goal
@@ -202,6 +217,49 @@ export default function Goals() {
                   Save Goal
                 </button>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPremiumAlert && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-6 shadow-xl text-center"
+            >
+              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown size={32} />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Goal Limit Reached</h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
+                Free users can only create up to 3 savings goals. Upgrade to Premium for unlimited goals!
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowPremiumAlert(false)}
+                  className="flex-1 py-3 rounded-xl font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowPremiumAlert(false);
+                    navigate('/premium');
+                  }}
+                  className="flex-1 py-3 rounded-xl font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 transition-transform active:scale-95"
+                >
+                  Upgrade
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

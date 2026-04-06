@@ -3,9 +3,13 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { Home, PieChart, PlusCircle, Target, User, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
+import { useTranslation } from '../lib/i18n';
+import { useStore } from '../store/useStore';
 
 export default function Layout() {
   const location = useLocation();
+  const { language } = useStore();
+  const { t } = useTranslation(language);
   const hideNavPaths = ['/login', '/signup', '/onboarding', '/add-transaction'];
   const shouldHideNav = hideNavPaths.includes(location.pathname);
 
@@ -18,8 +22,8 @@ export default function Layout() {
       {!shouldHideNav && (
         <nav className="absolute bottom-0 w-full bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 px-6 py-3 pb-safe">
           <ul className="flex justify-between items-center">
-            <NavItem to="/" icon={<Home size={24} />} label="Home" />
-            <NavItem to="/analytics" icon={<PieChart size={24} />} label="Analytics" />
+            <NavItem to="/" icon={<Home size={24} />} label={t('dashboard')} />
+            <NavItem to="/analytics" icon={<PieChart size={24} />} label={t('analytics')} />
             
             <li className="relative -top-6">
               <NavLink to="/add-transaction">
@@ -32,8 +36,8 @@ export default function Layout() {
               </NavLink>
             </li>
 
-            <NavItem to="/insights" icon={<Sparkles size={24} />} label="Insights" />
-            <NavItem to="/profile" icon={<User size={24} />} label="Profile" />
+            <NavItem to="/insights" icon={<Sparkles size={24} />} label={t('insights')} />
+            <NavItem to="/profile" icon={<User size={24} />} label={t('profile')} />
           </ul>
         </nav>
       )}

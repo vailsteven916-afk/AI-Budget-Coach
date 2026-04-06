@@ -41,6 +41,8 @@ interface AppState {
   hasCompletedOnboarding: boolean;
   darkMode: boolean;
   notifications: boolean;
+  language: string;
+  isPremium: boolean;
   balance: number;
   transactions: Transaction[];
   goals: Goal[];
@@ -49,6 +51,8 @@ interface AppState {
   setAuthReady: (ready: boolean) => void;
   setDarkMode: (isDark: boolean) => void;
   setNotifications: (enabled: boolean) => void;
+  setLanguage: (lang: string) => void;
+  setIsPremium: (isPremium: boolean) => void;
   completeOnboarding: () => void;
   setHasCompletedOnboarding: (completed: boolean) => void;
   setTransactions: (transactions: Transaction[]) => void;
@@ -66,6 +70,8 @@ export const useStore = create<AppState>((set) => ({
   hasCompletedOnboarding: false,
   darkMode: localStorage.getItem('darkMode') !== 'false',
   notifications: localStorage.getItem('notifications') !== 'false',
+  language: localStorage.getItem('language') || 'English',
+  isPremium: false,
   balance: 0,
   transactions: [],
   goals: [],
@@ -77,6 +83,7 @@ export const useStore = create<AppState>((set) => ({
       set({ 
         user: null, 
         isLoggedIn: false,
+        isPremium: false,
         balance: 0,
         transactions: [],
         goals: [],
@@ -102,6 +109,11 @@ export const useStore = create<AppState>((set) => ({
     }
     set({ notifications: enabled });
   },
+  setLanguage: (lang) => {
+    localStorage.setItem('language', lang);
+    set({ language: lang });
+  },
+  setIsPremium: (isPremium) => set({ isPremium }),
   setHasCompletedOnboarding: (completed) => set({ hasCompletedOnboarding: completed }),
   setTransactions: (transactions) => set({ transactions }),
   setGoals: (goals) => set({ goals }),

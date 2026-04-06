@@ -4,9 +4,11 @@ import { motion } from 'motion/react';
 import { Bell, ArrowUpRight, ArrowDownRight, Wallet, Sparkles, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format, isToday, isYesterday } from 'date-fns';
+import { useTranslation } from '../lib/i18n';
 
 export default function Dashboard() {
-  const { balance, transactions, goals, user } = useStore();
+  const { balance, transactions, goals, user, language } = useStore();
+  const { t } = useTranslation(language);
 
   const monthlyExpenses = transactions
     .filter(t => t.type === 'expense' && new Date(t.date).getMonth() === new Date().getMonth())
@@ -52,7 +54,7 @@ export default function Dashboard() {
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Wallet size={20} className="text-emerald-400" />
-              <span className="text-zinc-400 font-medium">Total Balance</span>
+              <span className="text-zinc-400 font-medium">{t('totalBalance')}</span>
             </div>
             <h2 className="text-4xl font-bold mb-6">{formatCurrency(balance)}</h2>
             
@@ -106,9 +108,9 @@ export default function Dashboard() {
           transition={{ delay: 0.2 }}
         >
           <div className="flex justify-between items-end mb-4">
-            <h3 className="text-lg font-bold">Recent Transactions</h3>
+            <h3 className="text-lg font-bold">{t('recentTransactions')}</h3>
             <Link to="/transactions" className="text-sm font-medium text-emerald-600 dark:text-emerald-400 flex items-center">
-              See All <ChevronRight size={16} />
+              {t('viewAll')} <ChevronRight size={16} />
             </Link>
           </div>
           
