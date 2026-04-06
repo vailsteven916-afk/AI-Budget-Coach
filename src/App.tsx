@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, onSnapshot, query, orderBy, setDoc } from 'firebase/firestore';
-import { Purchases } from '@revenuecat/purchases-js';
 import { auth, db } from './lib/firebase';
+import { logInRevenueCat, checkPremiumStatus } from './lib/revenuecat';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Onboarding from './pages/Onboarding';
@@ -63,17 +63,13 @@ export default function App() {
       
       if (user) {
         try {
-          if (Purchases.isConfigured()) {
-            const purchases = Purchases.getSharedInstance();
-            await purchases.changeUser(user.uid);
-            const customerInfo = await purchases.getCustomerInfo();
-            
-            const hasPremium = "AI Budget Coach Pro" in customerInfo.entitlements.active;
-            setIsPremium(hasPremium);
-            
-            if (hasPremium) {
-              await setDoc(doc(db, 'users', user.uid), { isPremium: true }, { merge: true });
-            }
+          const customerInfo = await logInRevenueCat(user.uid);
+          const hasPremium = checkPremiumStatus(customerInfo);
+          
+          setIsPremium(hasPremium);
+          
+          if (hasPremium) {
+            await setDoc(doc(db, 'users', user.uid), { isPremium: true }, { merge: true });
           }
         } catch (error) {
           console.error("Error checking RevenueCat entitlements:", error);

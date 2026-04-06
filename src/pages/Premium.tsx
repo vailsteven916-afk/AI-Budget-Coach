@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Purchases } from '@revenuecat/purchases-js';
+import { subscribeToPremium, checkPremiumStatus } from '../lib/revenuecat';
 
 export default function Premium() {
   const navigate = useNavigate();
@@ -19,24 +19,8 @@ export default function Premium() {
     setErrorMsg(null);
     
     try {
-      if (!Purchases.isConfigured()) {
-        throw new Error("RevenueCat is not configured. Please use a valid Web Billing API key (starts with rcb_).");
-      }
-      const purchases = Purchases.getSharedInstance();
-
-      // Fetch available offerings from RevenueCat
-      const offerings = await purchases.getOfferings();
-      const currentOffering = offerings.current;
-      if (!currentOffering) {
-        throw new Error("No current offering found in RevenueCat. Please configure offerings in your RevenueCat dashboard.");
-      }
-
-      // This will redirect to Stripe Checkout or show RevenueCat's web billing UI via the paywall
-      const purchaseResult = await purchases.presentPaywall({ offering: currentOffering });
-      const { customerInfo } = purchaseResult;
-
-      // Check if the user has any active entitlements after purchase
-      const hasPremium = "AI Budget Coach Pro" in customerInfo.entitlements.active;
+      const customerInfo = await subscribeToPremium();
+      const hasPremium = checkPremiumStatus(customerInfo);
 
       if (hasPremium) {
         setIsPremium(true);
@@ -50,7 +34,7 @@ export default function Premium() {
     } catch (error: any) {
       console.error('Error upgrading to premium:', error);
       // RevenueCat throws a specific error if the user cancels the purchase flow
-      if (error.errorCode === 1) { // UserCancelledError
+      if (error.errorCode === 1 || error.message?.includes('cancelled')) { 
         setErrorMsg(null); // Just ignore user cancellations
       } else {
         setErrorMsg(error.message || "Failed to initiate purchase. Please try again.");
