@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - balance: number (optional)
+    //   - hasCompletedOnboarding: boolean (optional)
+    //
+    // Collection: users/{userId}/transactions
+    // Document ID: {transactionId}
+    // Fields:
+    //   - amount: number
+    //   - type: string ('income' or 'expense')
+    //   - category: string
+    //   - date: string
+    //   - note: string (optional)
+    //   - tags: list of strings (optional)
+    //
+    // Collection: users/{userId}/goals
+    // Document ID: {goalId}
+    // Fields:
+    //   - title: string
+    //   - targetAmount: number
+    //   - currentAmount: number
+    //   - deadline: string
+    //   - icon: string
+    //
+    // Collection: users/{userId}/challenges
+    // Document ID: {challengeId}
+    // Fields:
+    //   - title: string
+    //   - description: string
+    //   - progress: number
+    //   - total: number
+    //   - completed: boolean
+    //
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUserProfile(data) {
+      return (!('balance' in data) || data.balance is number) &&
+             (!('hasCompletedOnboarding' in data) || data.hasCompletedOnboarding is bool);
+    }
+
+    function isValidTransaction(data) {
+      return data.amount is number &&
+             data.type in ['income', 'expense'] &&
+             data.category is string && data.category.size() < 100 &&
+             data.date is string && data.date.size() < 50 &&
+             (!('note' in data) || (data.note is string && data.note.size() < 500)) &&
+             (!('tags' in data) || (data.tags is list && data.tags.size() < 20));
+    }
+
+    function isValidGoal(data) {
+      return data.title is string && data.title.size() < 100 &&
+             data.targetAmount is number &&
+             data.currentAmount is number &&
+             data.deadline is string && data.deadline.size() < 50 &&
+             data.icon is string && data.icon.size() < 50;
+    }
+
+    function isValidChallenge(data) {
+      return data.title is string && data.title.size() < 100 &&
+             data.description is string && data.description.size() < 500 &&
+             data.progress is number &&
+             data.total is number &&
+             data.completed is bool;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTransaction(request.resource.data);
+        allow update: if isOwner(userId) && isValidTransaction(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+      
+      match /goals/{goalId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidGoal(request.resource.data);
+        allow update: if isOwner(userId) && isValidGoal(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+      
+      match /challenges/{challengeId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidChallenge(request.resource.data);
+        allow update: if isOwner(userId) && isValidChallenge(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

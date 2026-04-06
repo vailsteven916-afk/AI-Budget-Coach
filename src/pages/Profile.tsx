@@ -93,7 +93,7 @@ export default function Profile() {
             <ChevronRight size={20} className="text-zinc-400" />
           </Link>
           
-          <button className="w-full flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <Link to="/badges" className="w-full flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center">
                 <Award size={18} />
@@ -101,9 +101,9 @@ export default function Profile() {
               <span className="font-medium">Badges & Rewards</span>
             </div>
             <ChevronRight size={20} className="text-zinc-400" />
-          </button>
+          </Link>
 
-          <button className="w-full flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <Link to="/settings" className="w-full flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-lg flex items-center justify-center">
                 <Settings size={18} />
@@ -111,7 +111,7 @@ export default function Profile() {
               <span className="font-medium">Settings</span>
             </div>
             <ChevronRight size={20} className="text-zinc-400" />
-          </button>
+          </Link>
 
           <button onClick={handleLogout} className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
             <div className="flex items-center gap-3">

@@ -1,42 +1,91 @@
 import { motion } from 'motion/react';
 import { BrainCircuit, TrendingDown, AlertTriangle, Lightbulb, Trophy } from 'lucide-react';
-
-const insights = [
-  {
-    id: 1,
-    type: 'warning',
-    icon: <AlertTriangle size={20} className="text-amber-500" />,
-    title: "High Food Spending",
-    message: "You spent 28% more on food this week compared to last week.",
-    color: "bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/50"
-  },
-  {
-    id: 2,
-    type: 'prediction',
-    icon: <TrendingDown size={20} className="text-rose-500" />,
-    title: "Budget Risk",
-    message: "You are likely to exceed your shopping budget in 5 days at your current rate.",
-    color: "bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-900/50"
-  },
-  {
-    id: 3,
-    type: 'suggestion',
-    icon: <Lightbulb size={20} className="text-blue-500" />,
-    title: "Savings Opportunity",
-    message: "If you reduce food delivery by ৳2,000 per month, you could save ৳24,000 per year.",
-    color: "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/50"
-  },
-  {
-    id: 4,
-    type: 'positive',
-    icon: <Trophy size={20} className="text-emerald-500" />,
-    title: "Great Progress!",
-    message: "You are spending 15% less than last month. Keep it up!",
-    color: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/50"
-  }
-];
+import { useStore } from '../store/useStore';
+import { formatCurrency } from '../lib/utils';
 
 export default function Insights() {
+  const transactions = useStore(state => state.transactions);
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const currentYear = now.getFullYear();
+  const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+  const currentMonthExpenses = transactions.filter(t => t.type === 'expense' && new Date(t.date).getMonth() === currentMonth && new Date(t.date).getFullYear() === currentYear);
+  const lastMonthExpenses = transactions.filter(t => t.type === 'expense' && new Date(t.date).getMonth() === lastMonth && new Date(t.date).getFullYear() === lastMonthYear);
+
+  const currentMonthTotal = currentMonthExpenses.reduce((sum, t) => sum + t.amount, 0);
+  const lastMonthTotal = lastMonthExpenses.reduce((sum, t) => sum + t.amount, 0);
+
+  const categoryTotals = currentMonthExpenses.reduce((acc, t) => {
+    acc[t.category] = (acc[t.category] || 0) + t.amount;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+
+  const dynamicInsights = [];
+
+  if (topCategory) {
+    dynamicInsights.push({
+      id: 'top-cat',
+      type: 'warning',
+      icon: <AlertTriangle size={20} className="text-amber-500" />,
+      title: `High ${topCategory[0]} Spending`,
+      message: `You've spent ${formatCurrency(topCategory[1])} on ${topCategory[0]} this month. Keep an eye on this category!`,
+      color: "bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/50"
+    });
+  }
+
+  if (lastMonthTotal > 0) {
+    const diff = currentMonthTotal - lastMonthTotal;
+    const percentChange = Math.abs((diff / lastMonthTotal) * 100).toFixed(0);
+    
+    if (diff > 0) {
+      dynamicInsights.push({
+        id: 'mom-up',
+        type: 'prediction',
+        icon: <TrendingDown size={20} className="text-rose-500" />,
+        title: "Spending is Up",
+        message: `Your spending is up ${percentChange}% compared to last month. Try to slow down your expenses.`,
+        color: "bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-900/50"
+      });
+    } else {
+      dynamicInsights.push({
+        id: 'mom-down',
+        type: 'positive',
+        icon: <Trophy size={20} className="text-emerald-500" />,
+        title: "Great Progress!",
+        message: `You are spending ${percentChange}% less than last month. Keep it up!`,
+        color: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/50"
+      });
+    }
+  }
+
+  if (topCategory && topCategory[1] > 0) {
+    const potentialSavings = topCategory[1] * 0.2;
+    dynamicInsights.push({
+      id: 'savings-opp',
+      type: 'suggestion',
+      icon: <Lightbulb size={20} className="text-blue-500" />,
+      title: "Savings Opportunity",
+      message: `If you reduce your ${topCategory[0]} spending by 20%, you could save ${formatCurrency(potentialSavings)} this month.`,
+      color: "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/50"
+    });
+  }
+
+  if (dynamicInsights.length === 0) {
+    dynamicInsights.push({
+      id: 'no-data',
+      type: 'suggestion',
+      icon: <Lightbulb size={20} className="text-blue-500" />,
+      title: "Start Tracking",
+      message: "Add more transactions to get personalized AI insights about your spending habits.",
+      color: "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/50"
+    });
+  }
+
   return (
     <div className="flex flex-col min-h-full pb-24">
       <header className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
@@ -49,7 +98,7 @@ export default function Insights() {
       </header>
 
       <div className="px-6 space-y-4">
-        {insights.map((insight, index) => (
+        {dynamicInsights.map((insight, index) => (
           <motion.div
             key={insight.id}
             initial={{ opacity: 0, y: 20 }}

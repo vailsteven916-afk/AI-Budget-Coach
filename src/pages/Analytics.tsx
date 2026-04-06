@@ -2,6 +2,7 @@ import { useStore } from '../store/useStore';
 import { formatCurrency } from '../lib/utils';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { motion } from 'motion/react';
+import { startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay } from 'date-fns';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b'];
 
@@ -22,16 +23,18 @@ export default function Analytics() {
 
   const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
 
-  // Mock weekly data
-  const weeklyData = [
-    { name: 'Mon', amount: 1200 },
-    { name: 'Tue', amount: 800 },
-    { name: 'Wed', amount: 2500 },
-    { name: 'Thu', amount: 400 },
-    { name: 'Fri', amount: 3000 },
-    { name: 'Sat', amount: 5000 },
-    { name: 'Sun', amount: 1500 },
-  ];
+  const start = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const end = endOfWeek(new Date(), { weekStartsOn: 1 });
+  const days = eachDayOfInterval({ start, end });
+
+  const weeklyData = days.map(day => {
+    const dayExpenses = expenses.filter(t => isSameDay(new Date(t.date), day));
+    const amount = dayExpenses.reduce((sum, t) => sum + t.amount, 0);
+    return {
+      name: format(day, 'EEE'),
+      amount
+    };
+  });
 
   return (
     <div className="flex flex-col min-h-full pb-24">

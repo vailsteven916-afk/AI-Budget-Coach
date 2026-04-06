@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { addDays, subDays } from 'date-fns';
 import { User } from 'firebase/auth';
+import { collection, doc, setDoc, addDoc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export type Category = 'Food' | 'Transport' | 'Rent' | 'Shopping' | 'Bills' | 'Entertainment' | 'Health' | 'Education' | 'Income';
 
@@ -37,15 +39,24 @@ interface AppState {
   isAuthReady: boolean;
   user: User | null;
   hasCompletedOnboarding: boolean;
+  darkMode: boolean;
+  notifications: boolean;
   balance: number;
   transactions: Transaction[];
   goals: Goal[];
   challenges: Challenge[];
   setUser: (user: User | null) => void;
   setAuthReady: (ready: boolean) => void;
+  setDarkMode: (isDark: boolean) => void;
+  setNotifications: (enabled: boolean) => void;
   completeOnboarding: () => void;
-  addTransaction: (t: Omit<Transaction, 'id'>) => void;
-  addGoal: (g: Omit<Goal, 'id'>) => void;
+  setHasCompletedOnboarding: (completed: boolean) => void;
+  setTransactions: (transactions: Transaction[]) => void;
+  setGoals: (goals: Goal[]) => void;
+  setChallenges: (challenges: Challenge[]) => void;
+  setBalance: (balance: number) => void;
+  addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>;
+  addGoal: (g: Omit<Goal, 'id'>) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -53,22 +64,88 @@ export const useStore = create<AppState>((set) => ({
   isAuthReady: false,
   user: null,
   hasCompletedOnboarding: false,
+  darkMode: localStorage.getItem('darkMode') !== 'false',
+  notifications: localStorage.getItem('notifications') !== 'false',
   balance: 0,
   transactions: [],
   goals: [],
   challenges: [],
-  setUser: (user) => set({ user, isLoggedIn: !!user }),
+  setUser: (user) => {
+    if (user) {
+      set({ user, isLoggedIn: true });
+    } else {
+      set({ 
+        user: null, 
+        isLoggedIn: false,
+        balance: 0,
+        transactions: [],
+        goals: [],
+        challenges: [],
+        hasCompletedOnboarding: false
+      });
+    }
+  },
   setAuthReady: (ready) => set({ isAuthReady: ready }),
-  completeOnboarding: () => set({ hasCompletedOnboarding: true }),
-  addTransaction: (t) => set((state) => {
-    const newTransaction = { ...t, id: Math.random().toString(36).substring(2, 9) };
+  setDarkMode: (isDark) => {
+    localStorage.setItem('darkMode', String(isDark));
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    set({ darkMode: isDark });
+  },
+  setNotifications: (enabled) => {
+    localStorage.setItem('notifications', String(enabled));
+    if (enabled && 'Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+    set({ notifications: enabled });
+  },
+  setHasCompletedOnboarding: (completed) => set({ hasCompletedOnboarding: completed }),
+  setTransactions: (transactions) => set({ transactions }),
+  setGoals: (goals) => set({ goals }),
+  setChallenges: (challenges) => set({ challenges }),
+  setBalance: (balance) => set({ balance }),
+  addTransaction: async (t) => {
+    const state = useStore.getState();
+    if (!state.user) return;
+    
     const amountChange = t.type === 'income' ? t.amount : -t.amount;
-    return {
-      transactions: [newTransaction, ...state.transactions],
-      balance: state.balance + amountChange
-    };
-  }),
-  addGoal: (g) => set((state) => ({
-    goals: [...state.goals, { ...g, id: Math.random().toString(36).substring(2, 9) }]
-  })),
+    
+    try {
+      // Add transaction
+      await addDoc(collection(db, 'users', state.user.uid, 'transactions'), t);
+      
+      // Update balance
+      await setDoc(doc(db, 'users', state.user.uid), {
+        balance: increment(amountChange)
+      }, { merge: true });
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    }
+  },
+  addGoal: async (g) => {
+    const state = useStore.getState();
+    if (!state.user) return;
+    
+    try {
+      await addDoc(collection(db, 'users', state.user.uid, 'goals'), g);
+    } catch (error) {
+      console.error('Error adding goal:', error);
+    }
+  },
+  completeOnboarding: async () => {
+    const state = useStore.getState();
+    set({ hasCompletedOnboarding: true });
+    if (state.user) {
+      try {
+        await setDoc(doc(db, 'users', state.user.uid), {
+          hasCompletedOnboarding: true
+        }, { merge: true });
+      } catch (error) {
+        console.error('Error completing onboarding:', error);
+      }
+    }
+  },
 }));
