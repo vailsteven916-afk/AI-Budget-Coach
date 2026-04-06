@@ -94,7 +94,7 @@ export default function Settings() {
             <ChevronRight size={20} className="text-zinc-400" />
           </Link>
 
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <Link to="/help" className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center">
                 <HelpCircle size={18} />
@@ -102,7 +102,7 @@ export default function Settings() {
               <span className="font-medium">Help & Support</span>
             </div>
             <ChevronRight size={20} className="text-zinc-400" />
-          </button>
+          </Link>
         </motion.div>
       </div>
     </div>

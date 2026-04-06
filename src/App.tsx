@@ -18,6 +18,7 @@ import Transactions from './pages/Transactions';
 import Badges from './pages/Badges';
 import Settings from './pages/Settings';
 import PrivacySecurity from './pages/PrivacySecurity';
+import HelpSupport from './pages/HelpSupport';
 import { useStore } from './store/useStore';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -132,6 +133,7 @@ export default function App() {
           <Route path="badges" element={<Badges />} />
           <Route path="settings" element={<Settings />} />
           <Route path="privacy" element={<PrivacySecurity />} />
+          <Route path="help" element={<HelpSupport />} />
         </Route>
       </Routes>
     </BrowserRouter>
