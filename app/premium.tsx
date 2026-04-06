@@ -1,7 +1,8 @@
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Crown, CheckCircle2, ChevronLeft, Loader2, Lock, X, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'react-native';
+import { Crown, CheckCircle2, ChevronLeft, Loader2, Lock, X, AlertCircle } from 'lucide-react-native';
+import { useNavigate } from 'expo-router';
 import { useStore } from '../store/useStore';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -55,34 +56,34 @@ export default function Premium() {
   ];
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-zinc-950 text-white relative overflow-hidden">
+    <View className="flex flex-col h-[100dvh] bg-zinc-950 text-white relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-amber-900/20 via-zinc-950 to-zinc-950 pointer-events-none" />
+      <View className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-amber-900/20 via-zinc-950 to-zinc-950 pointer-events-none" />
       
       <header className="px-6 pt-12 pb-6 flex items-center gap-4 relative z-10">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-zinc-400 hover:text-white">
+        <TouchableOpacity onPress={() => navigate(-1)} className="p-2 -ml-2 text-zinc-400 hover:text-white">
           <ChevronLeft size={24} />
-        </button>
+        </TouchableOpacity>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-24 relative z-10">
-        <motion.div 
+      <View className="flex-1 overflow-y-auto px-6 pb-24 relative z-10">
+        <View 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center text-center mb-10"
         >
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/20 rotate-12">
+          <View className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/20 rotate-12">
             <Crown size={40} className="text-white -rotate-12" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">
+          </View>
+          <Text className="text-3xl font-bold mb-2">
             {isPremium ? 'Premium Active' : 'Upgrade to Premium'}
-          </h1>
-          <p className="text-zinc-400">
+          </Text>
+          <Text className="text-zinc-400">
             {isPremium ? 'You have unlocked the full power of your AI Budget Coach.' : 'Unlock the full power of your AI Budget Coach.'}
-          </p>
-        </motion.div>
+          </Text>
+        </View>
 
-        <motion.div 
+        <View 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -92,35 +93,35 @@ export default function Premium() {
             {features.map((feature, i) => (
               <li key={i} className="flex items-center gap-3">
                 <CheckCircle2 size={20} className="text-amber-500 shrink-0" />
-                <span className="text-zinc-200">{feature}</span>
+                <Text className="text-zinc-200">{feature}</Text>
               </li>
             ))}
           </ul>
-        </motion.div>
+        </View>
 
-        <motion.div 
+        <View 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="space-y-4"
         >
           {isPremium ? (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center">
+            <View className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center">
               <CheckCircle2 size={32} className="text-emerald-500 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-emerald-400 mb-1">You are a Premium Member</h3>
-              <p className="text-sm text-zinc-400">Your subscription is active. Enjoy all the features!</p>
-            </div>
+              <Text className="text-lg font-bold text-emerald-400 mb-1">You are a Premium Member</Text>
+              <Text className="text-sm text-zinc-400">Your subscription is active. Enjoy all the features!</Text>
+            </View>
           ) : (
             <>
               {errorMsg && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-sm text-red-400 flex items-start gap-3 mb-4">
+                <View className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-sm text-red-400 flex items-start gap-3 mb-4">
                   <AlertCircle size={18} className="shrink-0 mt-0.5" />
-                  <p>{errorMsg}</p>
-                </div>
+                  <Text>{errorMsg}</Text>
+                </View>
               )}
               
-              <button 
-                onClick={handleSubscribe}
+              <TouchableOpacity 
+                onPress={handleSubscribe}
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:pointer-events-none"
               >
@@ -135,14 +136,14 @@ export default function Premium() {
                     Start 7-Day Free Trial
                   </>
                 )}
-              </button>
-              <p className="text-center text-xs text-zinc-500">
+              </TouchableOpacity>
+              <Text className="text-center text-xs text-zinc-500">
                 Then ৳499/month. Cancel anytime. Billed securely via RevenueCat.
-              </p>
+              </Text>
             </>
           )}
-        </motion.div>
-      </div>
-    </div>
+        </View>
+      </View>
+    </View>
   );
 }

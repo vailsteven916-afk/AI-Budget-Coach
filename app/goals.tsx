@@ -1,9 +1,10 @@
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { formatCurrency } from '../lib/utils';
-import { motion, AnimatePresence } from 'motion/react';
-import { Target, Plus, ShieldAlert, Laptop, Plane, Car, Heart, X, Crown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'react-native';
+import { Target, Plus, ShieldAlert, Laptop, Plane, Car, Heart, X, Crown } from 'lucide-react-native';
+import { useNavigate } from 'expo-router';
 
 const iconMap: Record<string, React.ReactNode> = {
   ShieldAlert: <ShieldAlert size={24} />,
@@ -43,11 +44,11 @@ export default function Goals() {
   };
 
   return (
-    <div className="flex flex-col min-h-full pb-24">
+    <View className="flex flex-col min-h-full pb-24">
       <header className="px-6 pt-12 pb-6 flex justify-between items-center sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
-        <h1 className="text-2xl font-bold">Savings Goals</h1>
-        <button 
-          onClick={() => {
+        <Text className="text-2xl font-bold">Savings Goals</Text>
+        <TouchableOpacity 
+          onPress={() => {
             if (!isPremium && goals.length >= 3) {
               setShowPremiumAlert(true);
             } else {
@@ -57,19 +58,19 @@ export default function Goals() {
           className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center"
         >
           <Plus size={20} />
-        </button>
+        </TouchableOpacity>
       </header>
 
-      <div className="px-6 space-y-4">
+      <View className="px-6 space-y-4">
         {goals.length === 0 ? (
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 text-center shadow-sm border border-zinc-100 dark:border-zinc-800">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <View className="bg-white dark:bg-zinc-900 rounded-3xl p-8 text-center shadow-sm border border-zinc-100 dark:border-zinc-800">
+            <View className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Target size={32} />
-            </div>
-            <h3 className="text-lg font-bold mb-2">No Goals Yet</h3>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">Set a savings goal to start tracking your progress.</p>
-            <button 
-              onClick={() => {
+            </View>
+            <Text className="text-lg font-bold mb-2">No Goals Yet</Text>
+            <Text className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">Set a savings goal to start tracking your progress.</Text>
+            <TouchableOpacity 
+              onPress={() => {
                 if (!isPremium && goals.length >= 3) {
                   setShowPremiumAlert(true);
                 } else {
@@ -79,84 +80,84 @@ export default function Goals() {
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors active:scale-[0.98]"
             >
               Create Goal
-            </button>
-          </div>
+            </TouchableOpacity>
+          </View>
         ) : (
           goals.map((goal, index) => {
             const progress = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
             
             return (
-              <motion.div
+              <View
                 key={goal.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className="bg-white dark:bg-zinc-900 rounded-3xl p-5 shadow-sm border border-zinc-100 dark:border-zinc-800"
               >
-                <div className="flex gap-4 mb-4">
-                  <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-2xl flex items-center justify-center shrink-0">
+                <View className="flex gap-4 mb-4">
+                  <View className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-2xl flex items-center justify-center shrink-0">
                     {iconMap[goal.icon] || <Target size={24} />}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg">{goal.title}</h3>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  </View>
+                  <View className="flex-1">
+                    <Text className="font-bold text-lg">{goal.title}</Text>
+                    <Text className="text-sm text-zinc-500 dark:text-zinc-400">
                       {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    </Text>
+                  </View>
+                  <View className="text-right">
+                    <Text className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                       {progress.toFixed(0)}%
-                    </span>
-                  </div>
-                </div>
+                    </Text>
+                  </View>
+                </View>
 
-                <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <motion.div 
+                <View className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <View 
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1, delay: 0.2 }}
                     className="h-full bg-emerald-500 rounded-full"
                   />
-                </div>
+                </View>
                 
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 text-center">
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 text-center">
                   {formatCurrency(goal.targetAmount - goal.currentAmount)} left to reach your goal
-                </p>
-              </motion.div>
+                </Text>
+              </View>
             );
           })
         )}
-      </div>
+      </View>
 
-      <AnimatePresence>
+      <View>
         {isAdding && (
-          <motion.div 
+          <View 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4"
           >
-            <motion.div 
+            <View 
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl p-6 shadow-xl"
             >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">Create New Goal</h2>
-                <button 
-                  onClick={() => setIsAdding(false)}
+              <View className="flex justify-between items-center mb-6">
+                <Text className="text-xl font-bold">Create New Goal</Text>
+                <TouchableOpacity 
+                  onPress={() => setIsAdding(false)}
                   className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center"
                 >
                   <X size={16} />
-                </button>
-              </div>
+                </TouchableOpacity>
+              </View>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
+              <View onSubmit={handleSubmit} className="space-y-4">
+                <View>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Goal Name</label>
-                  <input 
+                  <TextInput 
                     type="text" 
                     required
                     value={title}
@@ -164,11 +165,11 @@ export default function Goals() {
                     placeholder="e.g. New Laptop"
                     className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                </div>
+                </View>
                 
-                <div>
+                <View>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Target Amount (৳)</label>
-                  <input 
+                  <TextInput 
                     type="number" 
                     required
                     min="1"
@@ -177,27 +178,27 @@ export default function Goals() {
                     placeholder="0.00"
                     className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                </div>
+                </View>
 
-                <div>
+                <View>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Target Date</label>
-                  <input 
+                  <TextInput 
                     type="date" 
                     required
                     value={deadline}
                     onChange={e => setDeadline(e.target.value)}
                     className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                </div>
+                </View>
 
-                <div>
+                <View>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Icon</label>
-                  <div className="flex gap-3">
+                  <View className="flex gap-3">
                     {Object.keys(iconMap).map(iconName => (
-                      <button
+                      <TouchableOpacity
                         key={iconName}
                         type="button"
-                        onClick={() => setIcon(iconName)}
+                        onPress={() => setIcon(iconName)}
                         className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
                           icon === iconName 
                             ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 border-2 border-emerald-500' 
@@ -205,65 +206,65 @@ export default function Goals() {
                         }`}
                       >
                         {iconMap[iconName]}
-                      </button>
+                      </TouchableOpacity>
                     ))}
-                  </div>
-                </div>
+                  </View>
+                </View>
 
-                <button 
+                <TouchableOpacity 
                   type="submit"
                   className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl mt-6 transition-colors active:scale-[0.98]"
                 >
                   Save Goal
-                </button>
-              </form>
-            </motion.div>
-          </motion.div>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         )}
-      </AnimatePresence>
+      </View>
 
-      <AnimatePresence>
+      <View>
         {showPremiumAlert && (
-          <motion.div 
+          <View 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
           >
-            <motion.div 
+            <View 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-6 shadow-xl text-center"
             >
-              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <View className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Crown size={32} />
-              </div>
-              <h2 className="text-xl font-bold mb-2">Goal Limit Reached</h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
+              </View>
+              <Text className="text-xl font-bold mb-2">Goal Limit Reached</Text>
+              <Text className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
                 Free users can only create up to 3 savings goals. Upgrade to Premium for unlimited goals!
-              </p>
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setShowPremiumAlert(false)}
+              </Text>
+              <View className="flex gap-3">
+                <TouchableOpacity 
+                  onPress={() => setShowPremiumAlert(false)}
                   className="flex-1 py-3 rounded-xl font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors"
                 >
                   Cancel
-                </button>
-                <button 
-                  onClick={() => {
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => {
                     setShowPremiumAlert(false);
                     navigate('/premium');
                   }}
                   className="flex-1 py-3 rounded-xl font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 transition-transform active:scale-95"
                 >
                   Upgrade
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         )}
-      </AnimatePresence>
-    </div>
+      </View>
+    </View>
   );
 }

@@ -3,6 +3,7 @@ import { addDays, subDays } from 'date-fns';
 import { User } from 'firebase/auth';
 import { collection, doc, setDoc, addDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type Category = 'Food' | 'Transport' | 'Rent' | 'Shopping' | 'Bills' | 'Entertainment' | 'Health' | 'Education' | 'Income';
 
@@ -61,6 +62,7 @@ interface AppState {
   setBalance: (balance: number) => void;
   addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>;
   addGoal: (g: Omit<Goal, 'id'>) => Promise<void>;
+  loadSettings: () => Promise<void>;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -68,14 +70,28 @@ export const useStore = create<AppState>((set) => ({
   isAuthReady: false,
   user: null,
   hasCompletedOnboarding: false,
-  darkMode: localStorage.getItem('darkMode') !== 'false',
-  notifications: localStorage.getItem('notifications') !== 'false',
-  language: localStorage.getItem('language') || 'English',
+  darkMode: true,
+  notifications: true,
+  language: 'English',
   isPremium: false,
   balance: 0,
   transactions: [],
   goals: [],
   challenges: [],
+  loadSettings: async () => {
+    try {
+      const dark = await AsyncStorage.getItem('darkMode');
+      const notif = await AsyncStorage.getItem('notifications');
+      const lang = await AsyncStorage.getItem('language');
+      set({
+        darkMode: dark !== 'false',
+        notifications: notif !== 'false',
+        language: lang || 'English'
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  },
   setUser: (user) => {
     if (user) {
       set({ user, isLoggedIn: true });
@@ -93,24 +109,16 @@ export const useStore = create<AppState>((set) => ({
     }
   },
   setAuthReady: (ready) => set({ isAuthReady: ready }),
-  setDarkMode: (isDark) => {
-    localStorage.setItem('darkMode', String(isDark));
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+  setDarkMode: async (isDark) => {
+    await AsyncStorage.setItem('darkMode', String(isDark));
     set({ darkMode: isDark });
   },
-  setNotifications: (enabled) => {
-    localStorage.setItem('notifications', String(enabled));
-    if (enabled && 'Notification' in window && Notification.permission !== 'granted') {
-      Notification.requestPermission();
-    }
+  setNotifications: async (enabled) => {
+    await AsyncStorage.setItem('notifications', String(enabled));
     set({ notifications: enabled });
   },
-  setLanguage: (lang) => {
-    localStorage.setItem('language', lang);
+  setLanguage: async (lang) => {
+    await AsyncStorage.setItem('language', lang);
     set({ language: lang });
   },
   setIsPremium: (isPremium) => set({ isPremium }),

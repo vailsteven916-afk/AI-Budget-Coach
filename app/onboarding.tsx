@@ -1,8 +1,9 @@
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'react-native';
+import { useNavigate } from 'expo-router';
 import { useStore } from '../store/useStore';
-import { ChevronRight, BrainCircuit, Target, TrendingUp } from 'lucide-react';
+import { ChevronRight, BrainCircuit, Target, TrendingUp } from 'lucide-react-native';
 
 const slides = [
   {
@@ -37,13 +38,13 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-zinc-950 text-white p-6 max-w-md mx-auto relative overflow-hidden">
+    <View className="flex flex-col h-[100dvh] bg-zinc-950 text-white p-6 max-w-md mx-auto relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-emerald-900/20 to-transparent pointer-events-none" />
+      <View className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-emerald-900/20 to-transparent pointer-events-none" />
       
-      <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+      <View className="flex-1 flex flex-col items-center justify-center relative z-10">
         <AnimatePresence mode="wait">
-          <motion.div
+          <View
             key={currentSlide}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -52,34 +53,34 @@ export default function Onboarding() {
             className="flex flex-col items-center text-center"
           >
             {slides[currentSlide].icon}
-            <h1 className="text-3xl font-bold mb-4 tracking-tight">{slides[currentSlide].title}</h1>
-            <p className="text-zinc-400 text-lg leading-relaxed px-4">
+            <Text className="text-3xl font-bold mb-4 tracking-tight">{slides[currentSlide].title}</Text>
+            <Text className="text-zinc-400 text-lg leading-relaxed px-4">
               {slides[currentSlide].description}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+            </Text>
+          </View>
+        </View>
+      </View>
 
-      <div className="pb-12 flex flex-col items-center gap-8 relative z-10">
-        <div className="flex gap-2">
+      <View className="pb-12 flex flex-col items-center gap-8 relative z-10">
+        <View className="flex gap-2">
           {slides.map((_, i) => (
-            <div
+            <View
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === currentSlide ? 'w-8 bg-emerald-500' : 'w-2 bg-zinc-800'
               }`}
             />
           ))}
-        </div>
+        </View>
 
-        <button
-          onClick={handleNext}
+        <TouchableOpacity
+          onPress={handleNext}
           className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98]"
         >
           {currentSlide === slides.length - 1 ? "Get Started" : "Continue"}
           <ChevronRight size={20} />
-        </button>
-      </div>
-    </div>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
