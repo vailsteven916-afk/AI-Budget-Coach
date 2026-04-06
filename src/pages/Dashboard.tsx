@@ -6,10 +6,14 @@ import { Link } from 'react-router-dom';
 import { format, isToday, isYesterday } from 'date-fns';
 
 export default function Dashboard() {
-  const { balance, monthlyIncome, transactions, goals } = useStore();
+  const { balance, transactions, goals, user } = useStore();
 
   const monthlyExpenses = transactions
     .filter(t => t.type === 'expense' && new Date(t.date).getMonth() === new Date().getMonth())
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const monthlyIncome = transactions
+    .filter(t => t.type === 'income' && new Date(t.date).getMonth() === new Date().getMonth())
     .reduce((sum, t) => sum + t.amount, 0);
 
   // Safe to spend calculation
@@ -28,7 +32,7 @@ export default function Dashboard() {
       <header className="px-6 pt-12 pb-6 flex justify-between items-center sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
         <div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-1">Good morning,</p>
-          <h1 className="text-2xl font-bold">Alex</h1>
+          <h1 className="text-2xl font-bold">{user?.displayName?.split(' ')[0] || 'User'}</h1>
         </div>
         <button className="w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center relative">
           <Bell size={20} />
@@ -83,9 +87,15 @@ export default function Dashboard() {
           </div>
           <div>
             <h3 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-1">Safe to spend today</h3>
-            <p className="text-emerald-700 dark:text-emerald-300 text-sm leading-relaxed">
-              You can safely spend <span className="font-bold">{formatCurrency(safeDailySpend)}</span> today and still hit your savings goals.
-            </p>
+            {monthlyIncome === 0 ? (
+              <p className="text-emerald-700 dark:text-emerald-300 text-sm leading-relaxed">
+                Add your income to see your safe daily spending limit.
+              </p>
+            ) : (
+              <p className="text-emerald-700 dark:text-emerald-300 text-sm leading-relaxed">
+                You have <span className="font-bold">{formatCurrency(remainingMoney - plannedSavings)}</span> left for the remaining {remainingDays} days of the month. You can safely spend <span className="font-bold">{formatCurrency(safeDailySpend)}</span> today.
+              </p>
+            )}
           </div>
         </motion.div>
 
@@ -103,30 +113,37 @@ export default function Dashboard() {
           </div>
           
           <div className="bg-white dark:bg-zinc-900 rounded-3xl p-2 shadow-sm border border-zinc-100 dark:border-zinc-800">
-            {recentTransactions.map((t, i) => {
-              const date = new Date(t.date);
-              const dateLabel = isToday(date) ? 'Today' : isYesterday(date) ? 'Yesterday' : format(date, 'MMM d');
-              
-              return (
-                <div key={t.id} className={cn("flex items-center justify-between p-4", i !== recentTransactions.length - 1 && "border-b border-zinc-100 dark:border-zinc-800")}>
-                  <div className="flex items-center gap-4">
-                    <div className={cn(
-                      "w-12 h-12 rounded-2xl flex items-center justify-center",
-                      t.type === 'income' ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                    )}>
-                      {t.type === 'income' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
+            {recentTransactions.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500 dark:text-zinc-400">
+                <p>No recent transactions.</p>
+                <Link to="/add-transaction" className="text-emerald-500 font-medium mt-2 inline-block">Add one now</Link>
+              </div>
+            ) : (
+              recentTransactions.map((t, i) => {
+                const date = new Date(t.date);
+                const dateLabel = isToday(date) ? 'Today' : isYesterday(date) ? 'Yesterday' : format(date, 'MMM d');
+                
+                return (
+                  <div key={t.id} className={cn("flex items-center justify-between p-4", i !== recentTransactions.length - 1 && "border-b border-zinc-100 dark:border-zinc-800")}>
+                    <div className="flex items-center gap-4">
+                      <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center",
+                        t.type === 'income' ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                      )}>
+                        {t.type === 'income' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
+                      </div>
+                      <div>
+                        <p className="font-semibold">{t.category}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.note} • {dateLabel}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold">{t.category}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.note} • {dateLabel}</p>
-                    </div>
+                    <p className={cn("font-bold", t.type === 'income' ? "text-emerald-600 dark:text-emerald-400" : "")}>
+                      {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                    </p>
                   </div>
-                  <p className={cn("font-bold", t.type === 'income' ? "text-emerald-600 dark:text-emerald-400" : "")}>
-                    {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
-                  </p>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </motion.div>
       </div>

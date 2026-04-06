@@ -43,7 +43,10 @@ export default function AddTransaction() {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl mb-8">
           <button
-            onClick={() => setType('expense')}
+            onClick={() => {
+              setType('expense');
+              if (category === 'Income') setCategory('Food');
+            }}
             className={`flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
               type === 'expense' ? 'bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500'
             }`}
@@ -52,7 +55,10 @@ export default function AddTransaction() {
             Expense
           </button>
           <button
-            onClick={() => setType('income')}
+            onClick={() => {
+              setType('income');
+              setCategory('Income');
+            }}
             className={`flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
               type === 'income' ? 'bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-white' : 'text-zinc-500'
             }`}

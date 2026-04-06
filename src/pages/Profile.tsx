@@ -1,10 +1,24 @@
+import React from 'react';
 import { motion } from 'motion/react';
 import { User, Settings, Crown, LogOut, ChevronRight, Target, Award, Shield } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { useStore } from '../store/useStore';
 
 export default function Profile() {
   const challenges = useStore(state => state.challenges);
+  const user = useStore(state => state.user);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-full pb-24">
@@ -23,8 +37,8 @@ export default function Profile() {
             <User size={32} />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold">Alex Doe</h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Level 4 Saver</p>
+            <h2 className="text-xl font-bold">{user?.displayName || 'User'}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{user?.email}</p>
           </div>
           <Link to="/premium" className="bg-gradient-to-r from-amber-400 to-amber-600 text-white p-2 rounded-xl shadow-lg shadow-amber-500/20">
             <Crown size={20} />
@@ -39,20 +53,26 @@ export default function Profile() {
         >
           <h3 className="text-lg font-bold mb-4">Active Challenges</h3>
           <div className="space-y-3">
-            {challenges.map(c => (
-              <div key={c.id} className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold">{c.title}</h4>
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{c.progress}/{c.total} d</span>
-                </div>
-                <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-emerald-500 rounded-full" 
-                    style={{ width: `${(c.progress / c.total) * 100}%` }}
-                  />
-                </div>
+            {challenges.length === 0 ? (
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 text-center">
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm">No active challenges.</p>
               </div>
-            ))}
+            ) : (
+              challenges.map(c => (
+                <div key={c.id} className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-semibold">{c.title}</h4>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{c.progress}/{c.total} d</span>
+                  </div>
+                  <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-emerald-500 rounded-full" 
+                      style={{ width: `${(c.progress / c.total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
 
@@ -93,7 +113,7 @@ export default function Profile() {
             <ChevronRight size={20} className="text-zinc-400" />
           </button>
 
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <button onClick={handleLogout} className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-lg flex items-center justify-center">
                 <LogOut size={18} />

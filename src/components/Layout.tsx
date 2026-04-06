@@ -6,7 +6,7 @@ import { motion } from 'motion/react';
 
 export default function Layout() {
   const location = useLocation();
-  const hideNavPaths = ['/login', '/onboarding', '/add-transaction'];
+  const hideNavPaths = ['/login', '/signup', '/onboarding', '/add-transaction'];
   const shouldHideNav = hideNavPaths.includes(location.pathname);
 
   return (

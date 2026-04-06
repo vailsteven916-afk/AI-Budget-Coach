@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { motion } from 'motion/react';
 import { BrainCircuit } from 'lucide-react';
 
-export default function Login() {
+export default function SignUp() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name });
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+      setError(err.message || 'Failed to sign up');
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignUp = async () => {
     setError('');
     try {
       await signInWithPopup(auth, googleProvider);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
+      setError(err.message || 'Failed to sign up with Google');
     }
   };
 
@@ -43,18 +45,29 @@ export default function Login() {
           <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mb-6">
             <BrainCircuit className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-zinc-500 dark:text-zinc-400">Sign in to continue your journey</p>
+          <h1 className="text-3xl font-bold mb-2">Create Account</h1>
+          <p className="text-zinc-500 dark:text-zinc-400">Join AI Budget Coach today</p>
         </motion.div>
 
         <motion.form 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          onSubmit={handleLogin} 
+          onSubmit={handleSignUp} 
           className="flex flex-col gap-4"
         >
           {error && <div className="text-rose-500 text-sm font-medium text-center">{error}</div>}
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+              placeholder="Alex Doe"
+              required
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Email</label>
             <input
@@ -77,18 +90,12 @@ export default function Login() {
               required
             />
           </div>
-          
-          <div className="flex justify-end mb-4">
-            <button type="button" className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
-              Forgot password?
-            </button>
-          </div>
 
           <button
             type="submit"
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-xl transition-colors active:scale-[0.98]"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-xl transition-colors active:scale-[0.98] mt-4"
           >
-            Sign In
+            Sign Up
           </button>
 
           <div className="relative my-4">
@@ -102,7 +109,7 @@ export default function Login() {
 
           <button
             type="button"
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleSignUp}
             className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white font-semibold py-4 rounded-xl transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -118,8 +125,8 @@ export default function Login() {
 
       <div className="pb-8 text-center">
         <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-emerald-600 dark:text-emerald-400 font-semibold">Sign up</Link>
+          Already have an account?{' '}
+          <Link to="/login" className="text-emerald-600 dark:text-emerald-400 font-semibold">Log in</Link>
         </p>
       </div>
     </div>

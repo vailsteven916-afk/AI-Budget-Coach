@@ -25,49 +25,62 @@ export default function Goals() {
       </header>
 
       <div className="px-6 space-y-4">
-        {goals.map((goal, index) => {
-          const progress = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
-          
-          return (
-            <motion.div
-              key={goal.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white dark:bg-zinc-900 rounded-3xl p-5 shadow-sm border border-zinc-100 dark:border-zinc-800"
-            >
-              <div className="flex gap-4 mb-4">
-                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-2xl flex items-center justify-center shrink-0">
-                  {iconMap[goal.icon] || <Target size={24} />}
+        {goals.length === 0 ? (
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 text-center shadow-sm border border-zinc-100 dark:border-zinc-800">
+            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Target size={32} />
+            </div>
+            <h3 className="text-lg font-bold mb-2">No Goals Yet</h3>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">Set a savings goal to start tracking your progress.</p>
+            <button className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors active:scale-[0.98]">
+              Create Goal
+            </button>
+          </div>
+        ) : (
+          goals.map((goal, index) => {
+            const progress = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
+            
+            return (
+              <motion.div
+                key={goal.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white dark:bg-zinc-900 rounded-3xl p-5 shadow-sm border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex gap-4 mb-4">
+                  <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-2xl flex items-center justify-center shrink-0">
+                    {iconMap[goal.icon] || <Target size={24} />}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg">{goal.title}</h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      {progress.toFixed(0)}%
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg">{goal.title}</h3>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    {progress.toFixed(0)}%
-                  </span>
-                </div>
-              </div>
 
-              <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 1, delay: 0.2 }}
-                  className="h-full bg-emerald-500 rounded-full"
-                />
-              </div>
-              
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 text-center">
-                {formatCurrency(goal.targetAmount - goal.currentAmount)} left to reach your goal
-              </p>
-            </motion.div>
-          );
-        })}
+                <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 1, delay: 0.2 }}
+                    className="h-full bg-emerald-500 rounded-full"
+                  />
+                </div>
+                
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 text-center">
+                  {formatCurrency(goal.targetAmount - goal.currentAmount)} left to reach your goal
+                </p>
+              </motion.div>
+            );
+          })
+        )}
       </div>
     </div>
   );
