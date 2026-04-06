@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getPurchases } from '../lib/revenuecat';
+import { Purchases } from '@revenuecat/purchases-js';
 
 export default function Premium() {
   const navigate = useNavigate();
-  const { isPremium, user } = useStore();
+  const { isPremium, user, setIsPremium } = useStore();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -19,27 +19,24 @@ export default function Premium() {
     setErrorMsg(null);
     
     try {
-      const purchases = getPurchases(user.uid);
-      if (!purchases) {
-        throw new Error("RevenueCat is not configured. Please add VITE_REVENUECAT_PUBLIC_KEY to your environment variables.");
-      }
+      const purchases = Purchases.getSharedInstance();
 
       // Fetch available offerings from RevenueCat
       const offerings = await purchases.getOfferings();
-      if (!offerings.current || offerings.current.availablePackages.length === 0) {
-        throw new Error("No subscription packages found in RevenueCat. Please configure offerings in your RevenueCat dashboard.");
+      const currentOffering = offerings.current;
+      if (!currentOffering) {
+        throw new Error("No current offering found in RevenueCat. Please configure offerings in your RevenueCat dashboard.");
       }
 
-      // We'll purchase the first available package in the current offering
-      const packageToBuy = offerings.current.availablePackages[0];
-      
-      // This will redirect to Stripe Checkout or show RevenueCat's web billing UI
-      const { customerInfo } = await purchases.purchasePackage(packageToBuy);
+      // This will redirect to Stripe Checkout or show RevenueCat's web billing UI via the paywall
+      const purchaseResult = await purchases.presentPaywall({ offering: currentOffering });
+      const { customerInfo } = purchaseResult;
 
       // Check if the user has any active entitlements after purchase
-      const hasPremium = Object.keys(customerInfo.entitlements.active).length > 0;
+      const hasPremium = "AI Budget Coach Pro" in customerInfo.entitlements.active;
 
       if (hasPremium) {
+        setIsPremium(true);
         // Update Firebase to reflect premium status
         await setDoc(doc(db, 'users', user.uid), {
           isPremium: true
@@ -49,7 +46,12 @@ export default function Premium() {
       }
     } catch (error: any) {
       console.error('Error upgrading to premium:', error);
-      setErrorMsg(error.message || "Failed to initiate purchase. Please try again.");
+      // RevenueCat throws a specific error if the user cancels the purchase flow
+      if (error.errorCode === 1) { // UserCancelledError
+        setErrorMsg(null); // Just ignore user cancellations
+      } else {
+        setErrorMsg(error.message || "Failed to initiate purchase. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
