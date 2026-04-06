@@ -5,10 +5,16 @@ import App from './App.tsx';
 import './index.css';
 
 const appUserId = Purchases.generateRevenueCatAnonymousAppUserId();
-Purchases.configure({
-    apiKey: "test_munXrmSXbnatIsKCHTECDDdOBMr",
-    appUserId: appUserId,
-});
+const apiKey = import.meta.env.VITE_REVENUECAT_PUBLIC_KEY || "test_munXrmSXbnatIsKCHTECDDdOBMr";
+
+try {
+  Purchases.configure({
+      apiKey: apiKey,
+      appUserId: appUserId,
+  });
+} catch (error) {
+  console.error("RevenueCat configuration failed:", error);
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -19,6 +19,9 @@ export default function Premium() {
     setErrorMsg(null);
     
     try {
+      if (!Purchases.isConfigured()) {
+        throw new Error("RevenueCat is not configured. Please use a valid Web Billing API key (starts with rcb_).");
+      }
       const purchases = Purchases.getSharedInstance();
 
       // Fetch available offerings from RevenueCat

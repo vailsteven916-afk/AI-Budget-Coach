@@ -63,15 +63,17 @@ export default function App() {
       
       if (user) {
         try {
-          const purchases = Purchases.getSharedInstance();
-          await purchases.changeUser(user.uid);
-          const customerInfo = await purchases.getCustomerInfo();
-          
-          const hasPremium = "AI Budget Coach Pro" in customerInfo.entitlements.active;
-          setIsPremium(hasPremium);
-          
-          if (hasPremium) {
-            await setDoc(doc(db, 'users', user.uid), { isPremium: true }, { merge: true });
+          if (Purchases.isConfigured()) {
+            const purchases = Purchases.getSharedInstance();
+            await purchases.changeUser(user.uid);
+            const customerInfo = await purchases.getCustomerInfo();
+            
+            const hasPremium = "AI Budget Coach Pro" in customerInfo.entitlements.active;
+            setIsPremium(hasPremium);
+            
+            if (hasPremium) {
+              await setDoc(doc(db, 'users', user.uid), { isPremium: true }, { merge: true });
+            }
           }
         } catch (error) {
           console.error("Error checking RevenueCat entitlements:", error);
