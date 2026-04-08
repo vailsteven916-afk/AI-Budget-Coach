@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useStore } from '../store/useStore';
 import { View, ActivityIndicator } from 'react-native';
+import '../global.css';
 
 export default function RootLayout() {
   const { setUser, setAuthReady, isAuthReady, isLoggedIn } = useStore();

@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import { useStore } from '../store/useStore';
 import { formatCurrency, cn } from '../lib/utils';
-import { motion } from 'react-native';
 import { Bell, ArrowUpRight, ArrowDownRight, Wallet, Sparkles, ChevronRight } from 'lucide-react-native';
 import { Link } from 'expo-router';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -32,7 +31,7 @@ export default function Dashboard() {
   return (
     <View className="flex flex-col min-h-full pb-24">
       {/* Header */}
-      <header className="px-6 pt-12 pb-6 flex justify-between items-center sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
+      <View className="px-6 pt-12 pb-6 flex justify-between items-center sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
         <View>
           <Text className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-1">Good morning,</Text>
           <Text className="text-2xl font-bold">{user?.displayName?.split(' ')[0] || 'User'}</Text>
@@ -41,13 +40,11 @@ export default function Dashboard() {
           <Bell size={20} />
           <Text className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-900"></Text>
         </TouchableOpacity>
-      </header>
+      </View>
 
       <View className="px-6 space-y-6">
         {/* Balance Card */}
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <View
           className="bg-zinc-900 dark:bg-zinc-900 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden"
         >
           <View className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
@@ -79,10 +76,7 @@ export default function Dashboard() {
         </View>
 
         {/* AI Insight Snippet */}
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <View
           className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-4 flex gap-4 items-start"
         >
           <View className="bg-emerald-100 dark:bg-emerald-900/50 p-2 rounded-xl text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -103,10 +97,7 @@ export default function Dashboard() {
         </View>
 
         {/* Recent Transactions */}
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <View
         >
           <View className="flex justify-between items-end mb-4">
             <Text className="text-lg font-bold">{t('recentTransactions')}</Text>

@@ -1,8 +1,7 @@
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import React from 'react';
-import { motion } from 'react-native';
 import { Award, Star, Trophy, Zap, Shield, Target, Flame } from 'lucide-react-native';
-import { useNavigate } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 const badges = [
   {
@@ -56,19 +55,18 @@ const badges = [
 ];
 
 export default function Badges() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <View className="flex flex-col min-h-full pb-24">
-      <header className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10 flex items-center gap-4">
+      <View className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10 flex items-center gap-4">
         <TouchableOpacity 
-          onPress={() => navigate(-1)}
-          className="w-10 h-10 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full flex items-center justify-center"
+          onPress={() => router.back()} className="w-10 h-10 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full flex items-center justify-center"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><Textath d="m15 18-6-6 6-6"/></svg>
+          <View style={{width: 20, height: 20, backgroundColor: "gray", borderRadius: 10}} />
         </TouchableOpacity>
         <Text className="text-2xl font-bold">Badges & Rewards</Text>
-      </header>
+      </View>
 
       <View className="px-6 space-y-6">
         <View className="bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl p-6 text-white shadow-lg shadow-amber-500/20">
@@ -89,11 +87,7 @@ export default function Badges() {
         <View className="grid grid-cols-2 gap-4">
           {badges.map((badge, index) => (
             <View
-              key={badge.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`p-4 rounded-3xl border ${badge.unlocked ? 'bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 shadow-sm' : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800/50 opacity-60 grayscale'}`}
+              key={badge.id} className={`p-4 rounded-3xl border ${badge.unlocked ? 'bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 shadow-sm' : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800/50 opacity-60 grayscale'}`}
             >
               <View className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${badge.color}`}>
                 {badge.icon}

@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+// @ts-ignore - getReactNativePersistence is exported in the react-native bundle
+import { getAuth, initializeAuth, getReactNativePersistence, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebaseConfig from '../firebase-applet-config.json';
@@ -12,5 +13,6 @@ const auth = initializeAuth(app, {
 });
 
 const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
 
-export { auth, db };
+export { auth, db, googleProvider };

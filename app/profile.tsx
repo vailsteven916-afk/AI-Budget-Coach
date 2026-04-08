@@ -1,8 +1,7 @@
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import React from 'react';
-import { motion } from 'react-native';
 import { User, Settings, Crown, LogOut, ChevronRight, Target, Award, Shield } from 'lucide-react-native';
-import { Link, useNavigate } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useStore } from '../store/useStore';
@@ -11,12 +10,12 @@ import { useTranslation } from '../lib/i18n';
 export default function Profile() {
   const { challenges, user, language, isPremium } = useStore();
   const { t } = useTranslation(language);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate('/login');
+      router.push('/login');
     } catch (error) {
       console.error('Failed to log out', error);
     }
@@ -24,15 +23,13 @@ export default function Profile() {
 
   return (
     <View className="flex flex-col min-h-full pb-24">
-      <header className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
+      <View className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
         <Text className="text-2xl font-bold">{t('profile')}</Text>
-      </header>
+      </View>
 
       <View className="px-6 space-y-6">
         {/* Profile Card */}
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <View
           className="flex items-center gap-4 bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800"
         >
           <View className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center">
@@ -55,10 +52,7 @@ export default function Profile() {
         </View>
 
         {/* Active Challenges */}
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <View
         >
           <Text className="text-lg font-bold mb-4">{t('activeChallenges')}</Text>
           <View className="space-y-3">
@@ -86,10 +80,7 @@ export default function Profile() {
         </View>
 
         {/* Menu */}
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <View
           className="bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden"
         >
           <Link href="/goals" className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">

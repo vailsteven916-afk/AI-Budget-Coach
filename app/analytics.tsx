@@ -1,8 +1,7 @@
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import { useStore } from '../store/useStore';
 import { formatCurrency } from '../lib/utils';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { motion } from 'react-native';
+// import recharts removed for React Native
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay } from 'date-fns';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b'];
@@ -39,14 +38,12 @@ export default function Analytics() {
 
   return (
     <View className="flex flex-col min-h-full pb-24">
-      <header className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
+      <View className="px-6 pt-12 pb-6 sticky top-0 bg-gray-50/80 dark:bg-zinc-950/80 backdrop-blur-md z-10">
         <Text className="text-2xl font-bold">Analytics</Text>
-      </header>
+      </View>
 
       <View className="px-6 space-y-6">
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <View
           className="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800"
         >
           <Text className="font-semibold mb-6">Spending by Category</Text>
@@ -56,27 +53,7 @@ export default function Analytics() {
                 No expenses yet
               </View>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <View style={{height: 200, justifyContent: "center", alignItems: "center"}}><Text style={{color: "white"}}>Chart Placeholder</Text></View>
             )}
           </View>
 
@@ -96,25 +73,12 @@ export default function Analytics() {
           </View>
         </View>
 
-        <View 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <View
           className="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800"
         >
           <Text className="font-semibold mb-6">This Week</Text>
           <View className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
-                <Tooltip 
-                  cursor={{ fill: 'transparent' }}
-                  formatter={(value: number) => formatCurrency(value)}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar dataKey="amount" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <View style={{height: 200, justifyContent: "center", alignItems: "center"}}><Text style={{color: "white"}}>Chart Placeholder</Text></View>
           </View>
         </View>
       </View>

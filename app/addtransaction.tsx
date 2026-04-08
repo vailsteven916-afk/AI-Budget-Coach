@@ -1,14 +1,13 @@
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import React, { useState } from 'react';
-import { useNavigate } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useStore, Category } from '../store/useStore';
-import { motion } from 'react-native';
 import { X, ArrowUpRight, ArrowDownRight, Tag, AlignLeft, Calendar } from 'lucide-react-native';
 
 const categories: Category[] = ['Food', 'Transport', 'Rent', 'Shopping', 'Bills', 'Entertainment', 'Health', 'Education', 'Income'];
 
 export default function AddTransaction() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const addTransaction = useStore(state => state.addTransaction);
   
   const [type, setType] = useState<'expense' | 'income'>('expense');
@@ -16,8 +15,8 @@ export default function AddTransaction() {
   const [category, setCategory] = useState<Category>('Food');
   const [note, setNote] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    
     if (!amount) return;
     
     addTransaction({
@@ -28,18 +27,18 @@ export default function AddTransaction() {
       date: new Date().toISOString(),
       tags: []
     });
-    navigate(-1);
+    router.back();
   };
 
   return (
     <View className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-zinc-950">
-      <header className="px-6 pt-12 pb-6 flex justify-between items-center bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
-        <TouchableOpacity onPress={() => navigate(-1)} className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
+      <View className="px-6 pt-12 pb-6 flex justify-between items-center bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
           <X size={24} />
         </TouchableOpacity>
         <Text className="text-lg font-bold">Add Transaction</Text>
         <View className="w-10" /> {/* Spacer */}
-      </header>
+      </View>
 
       <View className="flex-1 overflow-y-auto p-6">
         <View className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl mb-8">
@@ -53,7 +52,7 @@ export default function AddTransaction() {
             }`}
           >
             <ArrowUpRight size={18} className={type === 'expense' ? 'text-rose-500' : ''} />
-            Expense
+            <Text>Expense</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -65,35 +64,33 @@ export default function AddTransaction() {
             }`}
           >
             <ArrowDownRight size={18} className={type === 'income' ? 'text-emerald-500' : ''} />
-            Income
+            <Text>Income</Text>
           </TouchableOpacity>
         </View>
 
-        <View onSubmit={handleSubmit} className="space-y-6">
+        <View className="space-y-6">
           <View className="text-center mb-8">
-            <label className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2 block">Amount</label>
+            <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2 block">Amount</Text>
             <View className="flex items-center justify-center text-5xl font-bold">
               <Text className="text-zinc-400 mr-1">৳</Text>
               <TextInput
-                type="number"
+                keyboardType="numeric"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChangeText={setAmount}
                 className="bg-transparent w-full max-w-[200px] text-center focus:outline-none"
                 placeholder="0"
                 autoFocus
-                required
               />
             </View>
           </View>
 
           <View className="space-y-4">
             <View>
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 block">Category</label>
+              <Text className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 block">Category</Text>
               <View className="flex flex-wrap gap-2">
                 {categories.filter(c => type === 'expense' ? c !== 'Income' : c === 'Income').map(c => (
                   <TouchableOpacity
                     key={c}
-                    type="button"
                     onPress={() => setCategory(c)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${
                       category === c 
@@ -101,7 +98,7 @@ export default function AddTransaction() {
                         : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
                     }`}
                   >
-                    {c}
+                    <Text>{c}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -111,9 +108,8 @@ export default function AddTransaction() {
               <View className="flex items-center px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
                 <AlignLeft size={20} className="text-zinc-400 mr-3" />
                 <TextInput
-                  type="text"
                   value={note}
-                  onChange={(e) => setNote(e.target.value)}
+                  onChangeText={setNote}
                   placeholder="Note (optional)"
                   className="bg-transparent w-full text-sm focus:outline-none"
                 />
@@ -129,11 +125,8 @@ export default function AddTransaction() {
             </View>
           </View>
 
-          <TouchableOpacity
-            type="submit"
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-2xl transition-colors active:scale-[0.98] mt-8"
-          >
-            Save Transaction
+          <TouchableOpacity onPress={handleSubmit} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-4 rounded-2xl transition-colors active:scale-[0.98] mt-8">
+            <Text>Save Transaction</Text>
           </TouchableOpacity>
         </View>
       </View>
